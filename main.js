@@ -18,7 +18,7 @@ import { get, deleteResource, apply, patchResource } from "./k8s.js";
 const KYMA_PATH = '/apis/operator.kyma-project.io/v1beta2/namespaces/kyma-system/kymas/default'
 
 async function loadModules() {
-  return fetch("/modules.json").then(res => res.json())
+  return fetch("modules.json").then(res => res.json())
 }
 
 async function installedManagers(modules) {
