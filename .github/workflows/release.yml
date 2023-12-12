@@ -42,6 +42,7 @@ jobs:
           node-version: '20.x'
       - name: Build channels
         run: |
+          mkdir -p public
           npm install
           node build-modules.js
       - name: Release app
