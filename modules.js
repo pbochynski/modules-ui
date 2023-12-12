@@ -199,14 +199,7 @@ export default
       "deploymentYaml": "manager_manifest.yaml",
       "crYaml": "manager_default_CR.yaml"
     },
-    "versions": [
-      {
-        "version": "0.0.1",
-        "deploymentYaml": "https://github.com/SAP/cap-operator-lifecycle/releases/download/manager%2Fv0.0.1/manager_manifest.yaml",
-        "crYaml": "https://github.com/SAP/cap-operator-lifecycle/releases/download/manager%2Fv0.0.1/manager_default_CR.yaml"
-      }
-    ]
-
+    "versions": []    
   },
   {
     "name": "cluster-ip",
@@ -222,12 +215,6 @@ export default
       "deploymentYaml": "cluster-ip-operator.yaml",
       "crYaml": "cluster-ip-nodes.yaml",
     },
-    "versions": [
-      {
-        "version": "0.0.28",
-        "deploymentYaml": "https://github.com/pbochynski/cluster-ip/releases/download/0.0.28/cluster-ip-operator.yaml",
-        "crYaml": "https://github.com/pbochynski/cluster-ip/releases/download/0.0.28/cluster-ip-nodes.yaml"
-      }
-    ]
+    "versions": []
   }
 ]

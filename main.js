@@ -9,10 +9,13 @@ import '@ui5/webcomponents/dist/ResponsivePopover.js';
 import '@ui5/webcomponents/dist/Badge.js';
 import '@ui5/webcomponents/dist/Select.js';
 import '@ui5/webcomponents/dist/Option.js';
+import '@ui5/webcomponents/dist/Icon.js';
+import '@ui5/webcomponents/dist/Link.js';
 
 import "@ui5/webcomponents-icons/dist/delete.js";
 import "@ui5/webcomponents-icons/dist/settings.js";
 import "@ui5/webcomponents-icons/dist/add-product.js";
+import "@ui5/webcomponents-icons/dist/chain-link.js";
 import { get, deleteResource, apply, patchResource } from "./k8s.js";
 
 const KYMA_PATH = '/apis/operator.kyma-project.io/v1beta2/namespaces/kyma-system/kymas/default'
@@ -370,6 +373,8 @@ function availableModulesTable(modules) {
     row.appendChild(versionsCell)
     const actions = document.createElement('ui5-table-cell')
     actions.setAttribute('style', 'text-align: right')
+    if (m.documentation) actions.appendChild(externalLink(m.documentation, 'docs'))
+    if (m.repository) actions.appendChild(externalLink(m.repository, 'repo'))
     actions.appendChild(installBtn(m))
     row.appendChild(actions)
     table.appendChild(row)
@@ -416,6 +421,18 @@ function notManagedWarning(m) {
     return `<ui5-badge color-scheme="1">Not Managed</ui5-badge>`
   }
 }
+
+function externalLink(href, name) {
+  if (href) {
+    let link = document.createElement('ui5-link')
+    link.setAttribute('href', href)
+    link.setAttribute('target', '_blank')
+    link.innerHTML = `${name} <ui5-icon name="sap-icon://chain-link"></ui5-icon>`
+    return link
+  }
+  return null
+}
+
 
 function installedModulesTable(modules) {
   const columns = `<ui5-table-column slot="columns">name</ui5-table-column>
