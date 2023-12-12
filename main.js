@@ -364,7 +364,7 @@ function availableModulesTable(modules) {
   for (const m of modules) {
     const row = document.createElement('ui5-table-row')
     const nameCell = document.createElement('ui5-table-cell')
-    nameCell.textContent = m.name
+    nameCell.innerHTML = externalLinkHtml(m.documentation,m.name)
     row.appendChild(nameCell)
     const versionsCell = document.createElement('ui5-table-cell')
     versionsCell.textContent = m.versions.map(v => {
@@ -373,8 +373,6 @@ function availableModulesTable(modules) {
     row.appendChild(versionsCell)
     const actions = document.createElement('ui5-table-cell')
     actions.setAttribute('style', 'text-align: right')
-    if (m.documentation) actions.appendChild(externalLink(m.documentation, 'docs'))
-    if (m.repository) actions.appendChild(externalLink(m.repository, 'repo'))
     actions.appendChild(installBtn(m))
     row.appendChild(actions)
     table.appendChild(row)
@@ -401,7 +399,7 @@ function managedModulesTable(modules) {
   for (const m of modules) {
     let image = m.managerImage ? m.managerImage.split('/')[m.managerImage.split('/').length - 1] : ''
     const row = document.createElement('ui5-table-row')
-    row.innerHTML = `<ui5-table-cell>${m.name}</ui5-table-cell>
+    row.innerHTML = `<ui5-table-cell>${externalLinkHtml(m.documentation,m.name)}</ui5-table-cell>
     <ui5-table-cell>${m.channel}</ui5-table-cell>
     <ui5-table-cell>${m.actualVersion}</ui5-table-cell>
     <ui5-table-cell>${deploymentBadge(m)} ${image}</ui5-table-cell>`
@@ -420,15 +418,19 @@ function notManagedWarning(m) {
   if (m.actualVersion && m.manageable && !m.managed) {
     return `<ui5-badge color-scheme="1">Not Managed</ui5-badge>`
   }
+  return ''
+}
+
+function externalLinkHtml(href, name) {
+  if (href) {
+    return `<ui5-link href="${href}" target="_blank">${name}</ui5-link>`
+  }
+  return name
 }
 
 function externalLink(href, name) {
   if (href) {
-    let link = document.createElement('ui5-link')
-    link.setAttribute('href', href)
-    link.setAttribute('target', '_blank')
-    link.innerHTML = `${name} <ui5-icon name="sap-icon://chain-link"></ui5-icon>`
-    return link
+    return `<ui5-link href="${href}" target="_blank">${name} <ui5-icon name="sap-icon://chain-link"></ui5-icon></ui5-link>`
   }
   return null
 }
@@ -444,7 +446,7 @@ function installedModulesTable(modules) {
   for (const m of modules) {
     let image = m.managerImage.split('/')[m.managerImage.split('/').length - 1]
     const row = document.createElement('ui5-table-row')
-    row.innerHTML = `<ui5-table-cell>${m.name} ${notManagedWarning(m)}</ui5-table-cell>
+    row.innerHTML = `<ui5-table-cell>${externalLinkHtml(m.documentation,m.name)} ${notManagedWarning(m)}</ui5-table-cell>
     <ui5-table-cell>${m.actualVersion}</ui5-table-cell>
     <ui5-table-cell>${deploymentBadge(m)} ${image}</ui5-table-cell>`
 
