@@ -164,6 +164,25 @@ async function build() {
     }
   }
   await Promise.allSettled(tasks)
+  let managedModules = loadModulesFromManifests('module-manifests/modules')
+  for (let man of managedModules){
+    let m = modules.find(mod => mod.name == man.name)
+    if (!m) {
+      console.error('module ',man.name,'not found in modules.js')
+    } else {
+      for (let mv of man.versions) {
+        let v = m.versions.find(ver => ver.version == mv.version)
+        if (v) {
+          console.error('managed version ',mv.version,'already  found in module ',m.name)
+          Object.assign(v,mv)
+          
+        } else {
+          console.log('adding managed version ',mv.version,'to module ',m.name)
+          m.versions.push(mv)
+        }
+      }
+    }
+  }
 
   fs.writeFileSync(`public/modules.json`, JSON.stringify(modules, null, 2))
   console.log("modules written:", `build/modules.json`)
@@ -174,21 +193,6 @@ function getFolders(parentFolder) {
     .filter(dirent => dirent.isDirectory())
     .map(dirent => dirent.name)
 }
-function getFiles(parentFolder) {
-  return fs.readdirSync(parentFolder, { withFileTypes: true })
-    .filter(dirent => dirent.isFile())
-    .map(dirent => dirent.name)
-}
-
-// name: kyma-project.io/module/btp-operator
-// channel: fast
-// version: 1.0.2
-// manifest: btp-manager.yaml
-// defaultCR: btp-operator-default-cr.yaml
-// annotations:
-//   "operator.kyma-project.io/doc-url": "https://kyma-project.io/#/btp-manager/user/README"
-// moduleRepo: https://github.com/kyma-project/btp-manager.git
-// moduleSecurityScanConfig: true
 
 function managerPath(resources) {
   for (let r of resources) {
@@ -209,13 +213,14 @@ function managerImage(resources) {
   }
 }
 
-function loadModuleFromFolder(name) {
+function loadModuleFromFolder(folder,name) {
+  console.log("loading module", name, "from folder", folder)
   let m = { name, versions: [] }
-  getFolders(`module-manifests/modules/${name}`).forEach(channel => {
+  getFolders(`${folder}/${name}`).forEach(channel => {
     if (channel == 'dev') return // skip dev channel
     let moduleConfig = null
     try {
-      moduleConfig = fs.readFileSync(`module-manifests/modules/${name}/${channel}/module-config.yaml`, 'utf8')
+      moduleConfig = fs.readFileSync(`${folder}/${name}/${channel}/module-config.yaml`, 'utf8')
     } catch (e) {
       console.error("error reading module-config.yaml for module", name, channel)
       return;
@@ -234,21 +239,23 @@ function loadModuleFromFolder(name) {
       v = { version, channels: [channel] }
       m.versions.push(v)
     }
-    let manifest = fs.readFileSync(`module-manifests/modules/${name}/${channel}/${module.manifest}`, 'utf8')
+    let manifest = fs.readFileSync(`${folder}/${name}/${channel}/${module.manifest}`, 'utf8')
 
     let resources = []
     jsYaml.loadAll(manifest, (doc) => {
       resources.push(doc)
     });
-    fs.writeFileSync(`public/${m.name}-2-${v.version}.json`, JSON.stringify(resources, null, 2))
 
     v.documentation = module.annotations["operator.kyma-project.io/doc-url"]
     v.repository = module.moduleRepo
     v.managerPath = managerPath(resources)
     v.managerImage = managerImage(resources)
-    validateImageVersion(v.managerImage, v.version, channel)
+    // validateImageVersion(v.managerImage, v.version, channel)
+    if (!v.repository.includes('wdf.sap.corp')) {
+      fs.writeFileSync(`public/${m.name}-${v.version}.json`, JSON.stringify(resources, null, 2))
+    }
 
-    let crYaml = fs.readFileSync(`module-manifests/modules/${name}/${channel}/${module.defaultCR}`, 'utf8')
+    let crYaml = fs.readFileSync(`${folder}/${name}/${channel}/${module.defaultCR}`, 'utf8')
     v.cr = jsYaml.load(crYaml)
     if (!v.cr.metadata.namespace && isNamespaced(v.cr, resources)) {
       v.cr.metadata.namespace = 'kyma-system'
@@ -261,20 +268,18 @@ function loadModuleFromFolder(name) {
   return m
 }
 
-function loadModulesFromManifests() {
-  let names = getFolders('module-manifests/modules')
+function loadModulesFromManifests(folder) {
+  let names = getFolders(folder)
   let modules = []
   for (let name of names) {
-    let m = loadModuleFromFolder(name)
+    let m = loadModuleFromFolder(folder,name)
     if (m.versions.length > 0) {
-      modules.push(loadModuleFromFolder(name))
+      modules.push(m)
     } else {
       console.log("skipping module", name, "- no versions found")
     }
   }
-  fs.writeFileSync(`public/modules2.json`, JSON.stringify(modules, null, 2))
-  console.log("modules written:", `build/modules2.json`)
-
+  return modules
 }
-// build()
-loadModulesFromManifests()
+build()
+// loadModulesFromManifests('module-manifests/modules')

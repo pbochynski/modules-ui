@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "prebuild": "node build-modules.js",
+    "build": "vite build --base https://pbochynski.github.io/modules-ui/",
     "preview": "vite preview"
   },
   "devDependencies": {

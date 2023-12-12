@@ -38,14 +38,7 @@ export default
       "deploymentYaml": "istio-manager.yaml",
       "crYaml": "istio-default-cr.yaml"
     },
-    "versions": [
-      {
-        "version": "1.1.2",
-        "channels":["fast","regular"],
-        "deploymentYaml": "https://github.com/kyma-project/istio/releases/download/1.1.2/istio-manager.yaml",
-        "crYaml": "https://github.com/kyma-project/istio/releases/download/1.1.2/istio-default-cr.yaml"
-      }
-    ]
+    "versions": []
   },
   {
     "name": "api-gateway",
@@ -61,14 +54,7 @@ export default
       "deploymentYaml": "api-gateway-manager.yaml",
       "crYaml": "apigateway-default-cr.yaml"
     },
-    "versions": [
-      {
-        "version": "2.0.0",
-        "channels":["fast","regular"],
-        "deploymentYaml": "https://github.com/kyma-project/api-gateway/releases/download/2.0.0/api-gateway-manager.yaml",
-        "crYaml": "https://github.com/kyma-project/api-gateway/releases/download/2.0.0/apigateway-default-cr.yaml"
-      }
-    ]
+    "versions": []
   },
   {
     "name": "serverless",
@@ -84,20 +70,7 @@ export default
       "deploymentYaml": "serverless-operator.yaml",
       "crYaml": "default-serverless-cr.yaml"
     },
-    "versions": [      
-      {
-        "version": "1.1.0",
-        "channels":["fast"],
-        "deploymentYaml": "https://github.com/kyma-project/serverless/releases/download/1.1.0/serverless-operator.yaml  ",
-        "crYaml": "https://github.com/kyma-project/serverless/releases/download/1.1.0/default-serverless-cr.yaml"
-      },
-      {
-        "version": "1.0.3",
-        "channels":["regular"],
-        "deploymentYaml": "https://github.com/kyma-project/serverless/releases/download/v1.0.3/serverless-operator.yaml  ",
-        "crYaml": "https://github.com/kyma-project/serverless/releases/download/v1.0.3/default_serverless_cr.yaml"
-      }
-    ]
+    "versions": []
   },
   {
     "name": "btp-operator",
@@ -116,20 +89,7 @@ export default
       "deploymentYaml": "btp-manager.yaml",
       "crYaml": "btp-operator-default-cr.yaml"
     },
-    "versions": [
-      {
-        "version": "1.0.0",
-        "channels":["regular"],
-        "deploymentYaml": "https://github.com/kyma-project/btp-manager/releases/download/1.0.0/btp-manager.yaml",
-        "crYaml": "https://github.com/kyma-project/btp-manager/releases/download/1.0.0/btp-operator-default-cr.yaml"
-      },
-      {
-        "version": "1.0.1",
-        "channels":["fast"],
-        "deploymentYaml": "https://github.com/kyma-project/btp-manager/releases/download/1.0.1/btp-manager.yaml",
-        "crYaml": "https://github.com/kyma-project/btp-manager/releases/download/1.0.1/btp-operator-default-cr.yaml"
-      }
-    ]
+    "versions": []
   },
   {
     "name": "telemetry",
@@ -147,21 +107,7 @@ export default
       "deploymentYaml": "telemetry-manager.yaml",
       "crYaml": "telemetry-default-cr.yaml"
     },
-    "versions": [
-      {
-        "version": "1.3.0",
-        "channels":["fast"],
-        "deploymentYaml": "https://github.com/kyma-project/telemetry-manager/releases/download/1.3.0/telemetry-manager.yaml",
-        "crYaml": "https://github.com/kyma-project/telemetry-manager/releases/download/1.3.0/telemetry-default-cr.yaml"
-      },
-      {
-        "version": "1.2.0",
-        "channels":["regular"],
-        "deploymentYaml": "https://github.com/kyma-project/telemetry-manager/releases/download/1.2.0/telemetry-manager.yaml",
-        "crYaml": "https://github.com/kyma-project/telemetry-manager/releases/download/1.2.0/telemetry-default-cr.yaml"
-      }
-    ]
-
+    "versions": []
   },
   {
     "name": "nats",
@@ -176,15 +122,7 @@ export default
       "deploymentYaml": "nats-manager.yaml",
       "crYaml": "nats_default_cr.yaml"
     },
-    "versions": [      
-      {
-        "version": "1.0.2",
-        "channels":["fast","regular"],
-        "deploymentYaml": "https://github.com/kyma-project/nats-manager/releases/download/v1.0.2/nats-manager.yaml",
-        "crYaml": "https://github.com/kyma-project/nats-manager/releases/download/v1.0.2/nats_default_cr.yaml"
-      }
-    ]
-
+    "versions": []
   },
   {
     "name": "eventing",
@@ -201,14 +139,7 @@ export default
       "deploymentYaml": "eventing-manager.yaml",
       "crYaml": "eventing_default_cr.yaml"
     },
-    "versions": [
-      {
-        "version": "1.0.1",
-        "channels":["fast","regular"],
-        "deploymentYaml": "https://github.com/kyma-project/eventing-manager/releases/download/1.0.1/eventing-manager.yaml",
-        "crYaml": "https://github.com/kyma-project/eventing-manager/releases/download/1.0.1/eventing_default_cr.yaml"
-      }
-    ]
+    "versions": []
   },
   {
     "name": "application-connector",
@@ -223,14 +154,7 @@ export default
       "deploymentYaml": "application-connector-manager.yaml",
       "crYaml": "default_application_connector_cr.yaml"
     },
-    "versions": [
-      {
-        "version": "1.0.3",
-        "channels":["fast","regular"],
-        "deploymentYaml": "https://github.com/kyma-project/application-connector-manager/releases/download/1.0.3/application-connector-manager.yaml",
-        "crYaml": "https://github.com/kyma-project/application-connector-manager/releases/download/1.0.3/default_application_connector_cr.yaml"
-      }
-    ]
+    "versions": []
 
   },
   {
@@ -250,15 +174,7 @@ export default
       "deploymentYaml": "keda-manager.yaml",
       "crYaml": "keda-default-cr.yaml"
     },
-    "versions": [
-      {
-        "version": "1.0.0",
-        "channels":["fast","regular"],
-        "deploymentYaml": "https://github.com/kyma-project/keda-manager/releases/download/1.0.0/keda-manager.yaml",
-        "crYaml": "https://github.com/kyma-project/keda-manager/releases/download/1.0.0/keda-default-cr.yaml"
-      }
-    ]
-
+    "versions": []
   },
   {
     "name": "transparent-proxy",
@@ -267,26 +183,7 @@ export default
       "apis/operator.kyma-project.io/v1alpha1/transparentproxies"
     ],
     "manageable": true,
-    "cr": {
-      "resource": {
-        "apiVersion": "operator.kyma-project.io/v1alpha1",
-        "kind": "TransparentProxy",
-        "metadata": {
-          "name": "transparent-proxy",
-          "namespace": "sap-transp-proxy-system"
-        }
-      }
-    },
-    "versions": [
-      {
-        "version": "1.3.1",
-        "channels":["fast","regular"],
-        "managerPath": "/apis/apps/v1/namespaces/sap-transp-proxy-system/deployments/sap-transp-proxy-operator-controller-manager",
-        "managerImage": "sapse/sap-transp-proxy-operator:1.3.1",
-        "crPath": "/apis/operator.kyma-project.io/v1alpha1/namespaces/sap-transp-proxy-system/transparentproxies/transparent-proxy"
-      }
-    ]
-
+    "versions": []
   },
   {
     "name": "cap-operator",
