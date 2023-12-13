@@ -19,9 +19,11 @@ import "@ui5/webcomponents-icons/dist/chain-link.js";
 import { get, deleteResource, apply, patchResource } from "./k8s.js";
 
 const KYMA_PATH = '/apis/operator.kyma-project.io/v1beta2/namespaces/kyma-system/kymas/default'
+const url = new URL(window.location);
+let ASSETS_PATH = url.searchParams.get("assets") || ''
 
 async function loadModules() {
-  return fetch("modules.json").then(res => res.json())
+  return fetch(ASSETS_PATH+"modules.json").then(res => res.json())
 }
 
 async function installedManagers(modules) {
@@ -171,7 +173,7 @@ async function removeModuleFromKymaCR(name) {
 
 async function fetchModuleResources(m,version) {
   let v = version || m.actualVersion  
-  return fetch(`/${m.name}-${v}.json`).then(res => res.json())
+  return fetch(`${ASSETS_PATH}${m.name}-${v}.json`).then(res => res.json())
 
 }
 async function deleteModule(m, btn) {

@@ -44,12 +44,6 @@ async function getLatestVersion(m) {
     }
   }
 }
-function validateImageVersion(image, version, channel) {
-  let im = image.split('/')[image.split('/').length - 1]
-  if (!im.endsWith(`:${version}`)) {
-    console.error(`manager image version ${im} doesn't match version ${version} in channel ${channel}`)
-  }
-}
 
 function operatorImage(r) {
   const skip = ['kube-rbac-proxy']
@@ -107,9 +101,9 @@ async function loadModule(m, v) {
   }
   v.managerPath = managerPath(resources)
   v.managerImage = managerImage(resources)
-  validateImageVersion(v.managerImage, v.version, channel)
   
   url = v.crYaml || m.crYaml
+  
   if (!v.cr && url) {
     let response = await fetch(url)
     if (response.status != 200) {
@@ -250,7 +244,7 @@ function loadModuleFromFolder(folder,name) {
     v.repository = module.moduleRepo
     v.managerPath = managerPath(resources)
     v.managerImage = managerImage(resources)
-    // validateImageVersion(v.managerImage, v.version, channel)
+
     if (!v.repository.includes('wdf.sap.corp')) {
       fs.writeFileSync(`public/${m.name}-${v.version}.json`, JSON.stringify(resources, null, 2))
     }
