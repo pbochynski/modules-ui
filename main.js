@@ -13,17 +13,20 @@ import '@ui5/webcomponents/dist/Icon.js';
 import '@ui5/webcomponents/dist/Link.js';
 
 import "@ui5/webcomponents-icons/dist/delete.js";
+import "@ui5/webcomponents-icons/dist/refresh.js";
 import "@ui5/webcomponents-icons/dist/settings.js";
 import "@ui5/webcomponents-icons/dist/add-product.js";
 import "@ui5/webcomponents-icons/dist/chain-link.js";
 import { get, deleteResource, apply, patchResource } from "./k8s.js";
+import modules from "./model.js";
 
 const KYMA_PATH = '/apis/operator.kyma-project.io/v1beta2/namespaces/kyma-system/kymas/default'
 const url = new URL(window.location);
 let ASSETS_PATH = url.searchParams.get("assets") || ''
 
 async function loadModules() {
-  return fetch(ASSETS_PATH+"modules.json").then(res => res.json())
+  // return fetch(ASSETS_PATH+"modules.json").then(res => res.json())
+  return modules
 }
 
 async function installedManagers(modules) {
@@ -36,6 +39,9 @@ async function installedManagers(modules) {
   }
   await Promise.allSettled(Object.values(paths))
   for (let m of modules) {
+    m.available = false
+    m.managerImage = undefined
+    m.actualVersion = undefined
     for (let v of m.versions) {
       let cr = await paths[v.crPath]
       if (cr) {
@@ -70,6 +76,8 @@ async function installedManagers(modules) {
 function render(modules) {
   let app = document.querySelector('#app');
   app.innerHTML = ""
+
+  app.appendChild(refreshBtn())
 
   let managed = modules.filter(m => m.managed)
   app.appendChild(modulesCard(managedModulesTable(managed), 'Managed Modules',
@@ -173,7 +181,7 @@ async function removeModuleFromKymaCR(name) {
 
 async function fetchModuleResources(m,version) {
   let v = version || m.actualVersion  
-  return fetch(`${ASSETS_PATH}${m.name}-${v}.json`).then(res => res.json())
+  return m.versions.find(v => v.version == version).resources
 
 }
 async function deleteModule(m, btn) {
@@ -220,6 +228,16 @@ function configureBtn(m) {
 
   btn.addEventListener('click', () => {
     console.log('config for', m.name, m.config)
+  })
+  return btn
+}
+
+function refreshBtn() {
+  const btn = document.createElement('ui5-button')
+  btn.setAttribute('icon', 'refresh')
+  btn.textContent = 'Refresh'
+  btn.addEventListener('click', () => {
+    loadModules().then(managedModules).then(userModules).then(render)
   })
   return btn
 }

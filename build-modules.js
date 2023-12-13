@@ -1,8 +1,15 @@
 import * as jsYaml from 'js-yaml'
 import * as fs from 'fs'
 import modules from "./modules.js";
-import { get } from 'http';
 
+
+function trimNonDigitsPrefix(s){
+  for (let i = 0; i < s.length; i++) {
+    if (s[i] >= '0' && s[i] <= '9') {
+      return s.substring(i)
+    }
+  }
+}
 
 async function getLatestVersion(m) {
   if (m.latestGithubRelease) {
@@ -31,10 +38,10 @@ async function getLatestVersion(m) {
           console.log(crYaml.browser_download_url, "<>", existing.crYaml)
           throw new Error("CR YAML URL mismatch for latest release of module " + m.name)
         }
-      } else if (isSemVer(version)) {
+      } else {
         console.log("adding latest version", version, "to module", m.name)
         m.versions.push({
-          version: version,
+          version: trimNonDigitsPrefix(version),
           deploymentYaml: deploymentYaml.browser_download_url,
           crYaml: crYaml.browser_download_url
         })
@@ -96,8 +103,9 @@ async function loadModule(m, v) {
     jsYaml.loadAll(body, (doc) => {
       resources.push(doc)
     });
-    fs.writeFileSync(`public/${m.name}-${v.version}.json`, JSON.stringify(resources, null, 2))
-    console.log("module resources written to :", `build/${m.name}-${v.version}.json`)
+    v.resources = resources
+    // fs.writeFileSync(`public/${m.name}-${v.version}.json`, JSON.stringify(resources, null, 2))
+    // console.log("module resources written to :", `build/${m.name}-${v.version}.json`)
   }
   v.managerPath = managerPath(resources)
   v.managerImage = managerImage(resources)
@@ -158,28 +166,37 @@ async function build() {
     }
   }
   await Promise.allSettled(tasks)
-  let managedModules = loadModulesFromManifests('module-manifests/modules')
-  for (let man of managedModules){
-    let m = modules.find(mod => mod.name == man.name)
-    if (!m) {
-      console.error('module ',man.name,'not found in modules.js')
-    } else {
-      for (let mv of man.versions) {
-        let v = m.versions.find(ver => ver.version == mv.version)
-        if (v) {
-          console.error('managed version ',mv.version,'already  found in module ',m.name)
-          Object.assign(v,mv)
-          
-        } else {
-          console.log('adding managed version ',mv.version,'to module ',m.name)
-          m.versions.push(mv)
+
+  if (fs.existsSync('module-manifests/modules')) {
+    console.log("loading managed modules")
+    let managedModules = loadModulesFromManifests('module-manifests/modules')
+    for (let man of managedModules){
+      let m = modules.find(mod => mod.name == man.name)
+      if (!m) {
+        console.error('module ',man.name,'not found in modules.js')
+      } else {
+        for (let mv of man.versions) {
+          let v = m.versions.find(ver => ver.version == mv.version)
+          if (v) {
+            console.error('managed version ',mv.version,'already  found in module ',m.name)
+            Object.assign(v,mv)
+            
+          } else {
+            console.log('adding managed version ',mv.version,'to module ',m.name)
+            m.versions.push(mv)
+          }
         }
       }
     }
+  
+  } else{
+    console.log("No managed modules found. Clone module-manifests repo to add managed modules.")
   }
-
-  fs.writeFileSync(`public/modules.json`, JSON.stringify(modules, null, 2))
-  console.log("modules written:", `build/modules.json`)
+  let filtered = modules.filter(m => m.versions.length > 0) 
+  let code = `export default ${JSON.stringify(filtered, null, 2)}`
+  fs.writeFileSync(`model.js`, code)
+  fs.writeFileSync(`public/modules.json`, JSON.stringify(filtered, null, 2))
+  console.log("modules written:", `model.js`)
 }
 
 function getFolders(parentFolder) {
@@ -244,9 +261,9 @@ function loadModuleFromFolder(folder,name) {
     v.repository = module.moduleRepo
     v.managerPath = managerPath(resources)
     v.managerImage = managerImage(resources)
-
     if (!v.repository.includes('wdf.sap.corp')) {
-      fs.writeFileSync(`public/${m.name}-${v.version}.json`, JSON.stringify(resources, null, 2))
+      v.resources = resources
+//      fs.writeFileSync(`public/${m.name}-${v.version}.json`, JSON.stringify(resources, null, 2))
     }
 
     let crYaml = fs.readFileSync(`${folder}/${name}/${channel}/${module.defaultCR}`, 'utf8')
