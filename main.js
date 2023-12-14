@@ -19,6 +19,22 @@ import "@ui5/webcomponents-icons/dist/add-product.js";
 import "@ui5/webcomponents-icons/dist/chain-link.js";
 import { get, deleteResource, apply, patchResource } from "./k8s.js";
 import modules from "./model.js";
+import * as monaco from 'monaco-editor';
+import editorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker';
+import yamlWorker from 'monaco-yaml/yaml.worker?worker';
+import * as jsYaml from 'js-yaml'
+
+self.MonacoEnvironment = {
+  getWorker: function (workerId, label) {
+    switch (label) {
+      case 'yaml':
+        return yamlWorker();
+      default:
+        return editorWorker();
+    }
+  }
+};
+
 
 const KYMA_PATH = '/apis/operator.kyma-project.io/v1beta2/namespaces/kyma-system/kymas/default'
 const url = new URL(window.location);
@@ -28,6 +44,7 @@ async function loadModules() {
   // return fetch(ASSETS_PATH+"modules.json").then(res => res.json())
   return modules
 }
+
 
 async function installedManagers(modules) {
   let paths = {}
@@ -135,8 +152,8 @@ async function managedResourcesList(m) {
   }
   return list.sort()
 }
-async function applyModuleResources(m,version) {
-  let res = await fetchModuleResources(m,version)
+async function applyModuleResources(m, version) {
+  let res = await fetchModuleResources(m, version)
   for (let r of res) {
     await apply(r)
   }
@@ -155,7 +172,7 @@ async function addModuleToKymaCR(name, defaultConfig, channel) {
   let kyma = await get(KYMA_PATH)
   if (kyma && kyma.spec.modules) {
     let index = kyma.spec.modules.findIndex((m) => m.name == name)
-    
+
     let policy = (defaultConfig) ? 'CreateAndDelete' : 'Ignore'
     let body = `[{"op":"add","path":"/spec/modules/-","value":{"name":"${name}","customResourcePolicy":"${policy}","channel":"${channel}"}}]`
     if (index >= 0) {
@@ -179,8 +196,8 @@ async function removeModuleFromKymaCR(name) {
   }
 }
 
-async function fetchModuleResources(m,version) {
-  let v = version || m.actualVersion  
+async function fetchModuleResources(m, version) {
+  let v = version || m.actualVersion
   return m.versions.find(v => v.version == version).resources
 
 }
@@ -226,8 +243,17 @@ function configureBtn(m) {
   }
 
 
-  btn.addEventListener('click', () => {
-    console.log('config for', m.name, m.config)
+  btn.addEventListener('click', async () => {
+    const div = document.createElement('div')
+    div.setAttribute('class', 'code')
+    popover(m.name + ' Configuration', div, btn, "Close", async () => {})
+    let code  = jsYaml.dump(m.config)
+    setTimeout(() => {
+      monaco.editor.create(div, {
+      value: code,
+      language: 'yaml'
+    });},0)
+  
   })
   return btn
 }
@@ -295,12 +321,12 @@ function dropdownSelector(id, label, options) {
 }
 
 function channelList(m) {
-  const list=[]
+  const list = []
   for (let v of m.versions) {
     if (v.channels) {
       for (let c of v.channels) {
-        list.push({label: `${c} (${v.version})`, value: c})
-        
+        list.push({ label: `${c} (${v.version})`, value: c })
+
       }
     }
   }
@@ -313,8 +339,8 @@ function installPanel(m) {
   const managed = document.createElement('ui5-checkbox')
   managed.setAttribute('text', 'add as managed module (auto-update with the release channel)')
   managed.setAttribute('id', 'managedCheckbox')
-  const version = dropdownSelector(m.name+'-version', 'Version', m.versions.map(v => v.version).reverse())
-  const channel = dropdownSelector(m.name+'-channel', 'Channel', channelList(m))
+  const version = dropdownSelector(m.name + '-version', 'Version', m.versions.map(v => v.version).reverse())
+  const channel = dropdownSelector(m.name + '-channel', 'Channel', channelList(m))
   managed.addEventListener('change', () => {
     if (managed.checked) {
       channel.setAttribute('style', 'display: block')
@@ -362,11 +388,11 @@ function installBtn(m) {
         let v = m.versions.find(v => v.version == options.getVersion())
         if (v) {
           console.log('installing', m.name, v.version)
-          await applyModuleResources(m,v.version)
+          await applyModuleResources(m, v.version)
           if (options.querySelector('#defaultConfigCheckbox').checked) {
-            console.log('applying default config for', m.name,v.cr)  
+            console.log('applying default config for', m.name, v.cr)
             await apply(v.cr)
-          }  
+          }
         }
 
       }
@@ -384,7 +410,7 @@ function availableModulesTable(modules) {
   for (const m of modules) {
     const row = document.createElement('ui5-table-row')
     const nameCell = document.createElement('ui5-table-cell')
-    nameCell.innerHTML = externalLinkHtml(m.documentation,m.name)
+    nameCell.innerHTML = externalLinkHtml(m.documentation, m.name)
     row.appendChild(nameCell)
     const versionsCell = document.createElement('ui5-table-cell')
     versionsCell.textContent = m.versions.map(v => {
@@ -419,7 +445,7 @@ function managedModulesTable(modules) {
   for (const m of modules) {
     let image = m.managerImage ? m.managerImage.split('/')[m.managerImage.split('/').length - 1] : ''
     const row = document.createElement('ui5-table-row')
-    row.innerHTML = `<ui5-table-cell>${externalLinkHtml(m.documentation,m.name)}</ui5-table-cell>
+    row.innerHTML = `<ui5-table-cell>${externalLinkHtml(m.documentation, m.name)}</ui5-table-cell>
     <ui5-table-cell>${m.channel}</ui5-table-cell>
     <ui5-table-cell>${m.actualVersion}</ui5-table-cell>
     <ui5-table-cell>${deploymentBadge(m)} ${image}</ui5-table-cell>`
@@ -466,7 +492,7 @@ function installedModulesTable(modules) {
   for (const m of modules) {
     let image = m.managerImage.split('/')[m.managerImage.split('/').length - 1]
     const row = document.createElement('ui5-table-row')
-    row.innerHTML = `<ui5-table-cell>${externalLinkHtml(m.documentation,m.name)} ${notManagedWarning(m)}</ui5-table-cell>
+    row.innerHTML = `<ui5-table-cell>${externalLinkHtml(m.documentation, m.name)} ${notManagedWarning(m)}</ui5-table-cell>
     <ui5-table-cell>${m.actualVersion}</ui5-table-cell>
     <ui5-table-cell>${deploymentBadge(m)} ${image}</ui5-table-cell>`
 
@@ -496,8 +522,6 @@ function popover(title, content, anchor, btnText, onClick) {
   const popover = document.createElement('ui5-responsive-popover')
   popover.setAttribute('header-text', title)
   popover.setAttribute('media-range', 'S')
-  const popContent = document.createElement('div')
-  popContent.setAttribute('class', 'popover-content')
   popover.appendChild(content)
   const footer = document.createElement('div')
   footer.setAttribute('slot', 'footer')
