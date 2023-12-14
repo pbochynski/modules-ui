@@ -97,13 +97,18 @@ function render(modules) {
   app.appendChild(refreshBtn())
 
   let managed = modules.filter(m => m.managed)
-  app.appendChild(modulesCard(managedModulesTable(managed), 'Managed Modules',
+  if (managed.length > 0) {
+    app.appendChild(modulesCard(managedModulesTable(managed), 'Managed Modules',
     'Modules managed by the Kyma Control Plane (auto-update with the release channel)'))
+  }
 
   let installed = modules.filter(m => m.actualVersion && !m.managed)
-  app.appendChild(
-    modulesCard(installedModulesTable(installed), 'User Modules',
-      'Modules installed by the user (no auto-update)'))
+  if (installed.length > 0) {
+    app.appendChild(
+      modulesCard(installedModulesTable(installed), 'User Modules',
+        'Modules installed by the user (no auto-update)'))
+  
+  }
 
   app.appendChild(modulesCard(availableModulesTable(modules), 'Available Modules',
     'List of all modules available for installation'))
@@ -198,7 +203,7 @@ async function removeModuleFromKymaCR(name) {
 
 async function fetchModuleResources(m, version) {
   let v = version || m.actualVersion
-  return m.versions.find(v => v.version == version).resources
+  return m.versions.find(ver => ver.version == v).resources
 
 }
 async function deleteModule(m, btn) {
